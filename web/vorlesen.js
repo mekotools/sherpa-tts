@@ -21,8 +21,10 @@ const ELEMENTE = {
   text: document.getElementById("text"),
   vorlesen: document.getElementById("generateBtn"),
   status: document.getElementById("status"),
-  balken: document.getElementById("balken"),
+  balken: document.getElementById("balken"), // Erzeugung (unter dem Knopf)
   fuellung: document.getElementById("balkenFuellung"),
+  stimmenBalken: document.getElementById("stimmenBalken"), // Stimme laden
+  stimmenFuellung: document.getElementById("stimmenFuellung"),
   erzeugung: document.getElementById("generationStatus"),
   fehler: document.getElementById("fehler"),
   klippe: document.getElementById("sound-clips"),
@@ -32,7 +34,11 @@ let ablauf = null; // der laufende Arbeiter
 let stimmkatalog = null; // Inhalt von stimmen.json
 let geladeneKennung = null; // welche Stimme steckt im Rechenkern
 let clipZaehler = 0;
-let audioKontext = null;
+let spieler = []; // alle Abspieler der Seite — es soll immer nur einer laufen
+let erzeugungStart = 0; // Beginn der Erzeugung (für die Restzeit)
+let erzeugungAnteil = null;
+let erzeugungUhr = null;
+let stimmeStart = 0; // Beginn des Stimmenladens (für die Restzeit)
 
 /* ---------------------------------------------------------------- Anzeigen */
 
@@ -41,14 +47,57 @@ function status(text) {
   ELEMENTE.status.style.display = text ? "block" : "none";
 }
 
-function fortschritt(anteil) {
+/* Fortschritt zeigen. ziel: "erzeugung" (unter dem Knopf, Vorgabe) oder
+ * "stimme" (am Stimmenfeld). Der Balken zeigt immer nur einen gemeldeten,
+ * echten Wert — nie eine Schätzung. Die Restzeit steht daneben im Text. */
+function fortschritt(anteil, ziel) {
+  const balken = ziel === "stimme" ? ELEMENTE.stimmenBalken : ELEMENTE.balken;
+  const fuellung = ziel === "stimme" ? ELEMENTE.stimmenFuellung : ELEMENTE.fuellung;
   if (anteil === null) {
-    ELEMENTE.balken.style.display = "none";
-    ELEMENTE.fuellung.style.width = "0";
+    balken.style.display = "none";
+    fuellung.style.width = "0";
     return;
   }
-  ELEMENTE.balken.style.display = "block";
-  ELEMENTE.fuellung.style.width = Math.max(0, Math.min(100, anteil * 100)) + "%";
+  balken.style.display = "block";
+  fuellung.style.width = Math.max(0, Math.min(100, anteil * 100)) + "%";
+}
+
+/* Restzeit aus echtem Fortschritt: vergangene Zeit geteilt durch den Anteil
+ * ergibt die Gesamtdauer; abzüglich der vergangenen Zeit bleibt die Restzeit.
+ * Sie wird als Schätzung ausgewiesen ("noch etwa"), nicht als Zusage. */
+function restzeit(anteil, gestartet) {
+  if (!gestartet || !(anteil > 0.02)) return "";
+  const vergangen = (performance.now() - gestartet) / 1000;
+  const rest = vergangen / anteil - vergangen;
+  if (!Number.isFinite(rest) || rest <= 0) return "";
+  if (rest < 1) return "unter einer Sekunde";
+  if (rest < 60) return Math.round(rest) + " s";
+  const minuten = Math.floor(rest / 60);
+  return minuten + " min " + Math.round(rest - minuten * 60) + " s";
+}
+
+function erzeugungAnzeigen() {
+  if (erzeugungAnteil === null) {
+    erzeugungsStatus("Wird erzeugt …");
+    return;
+  }
+  const prozent = Math.round(erzeugungAnteil * 100);
+  const rest = restzeit(erzeugungAnteil, erzeugungStart);
+  erzeugungsStatus("Wird erzeugt … " + prozent + " %" + (rest ? " — noch etwa " + rest : ""));
+}
+
+/* Die Uhr aktualisiert nur den Text zwischen zwei echten Meldungen — der Balken
+ * springt weiterhin ausschließlich auf gemeldete Werte. */
+function erzeugungUhrStarten() {
+  erzeugungUhrStoppen();
+  erzeugungUhr = setInterval(erzeugungAnzeigen, 500);
+}
+
+function erzeugungUhrStoppen() {
+  if (erzeugungUhr) {
+    clearInterval(erzeugungUhr);
+    erzeugungUhr = null;
+  }
 }
 
 function zeigeFehler(text) {
@@ -88,37 +137,39 @@ function arbeiterStarten() {
         break;
       case "mekotools-stimme-fortschritt": {
         const anteil = daten.gesamt ? daten.geholt / daten.gesamt : null;
-        fortschritt(anteil);
+        fortschritt(anteil, "stimme");
+        const rest = restzeit(anteil, stimmeStart);
         status(
           "Stimme wird einmalig geladen: " +
             (anteil === null ? "" : Math.round(anteil * 100) + " % ") +
-            "(" + mb(daten.geholt) + (daten.gesamt ? " von " + mb(daten.gesamt) : "") + ")",
+            "(" + mb(daten.geholt) + (daten.gesamt ? " von " + mb(daten.gesamt) : "") + ")" +
+            (rest ? " — noch etwa " + rest : ""),
         );
         break;
       }
       case "sherpa-onnx-tts-ready":
         geladeneKennung = daten.name || null;
-        fortschritt(null);
+        fortschritt(null, "stimme");
         status("");
         ELEMENTE.vorlesen.disabled = false;
         stimmungAnzeigen();
         break;
       case "sherpa-onnx-tts-generation-progress": {
-        const anteil = typeof daten.progress === "number" ? daten.progress : null;
-        fortschritt(anteil);
-        erzeugungsStatus(
-          "Wird erzeugt …" + (anteil === null ? "" : " " + Math.round(anteil * 100) + " %"),
-        );
+        // Echter Fortschritt aus dem Rechenkern (0 bis 1).
+        erzeugungAnteil = typeof daten.progress === "number" ? daten.progress : null;
+        fortschritt(erzeugungAnteil);
+        erzeugungAnzeigen();
         break;
       }
       case "sherpa-onnx-tts-result":
+        erzeugungUhrStoppen();
         erzeugungsStatus("");
         fortschritt(null);
         ELEMENTE.vorlesen.disabled = false;
-        abspielen(daten);
-        clipAnlegen(daten);
+        clipAnlegen(daten); // spielt gleich los, siehe dort
         break;
       case "error":
+        erzeugungUhrStoppen();
         ELEMENTE.vorlesen.disabled = false;
         fortschritt(null);
         zeigeFehler("Es ist ein Fehler aufgetreten:\n" + (daten.message || "ohne Angabe"));
@@ -200,8 +251,9 @@ async function stimmeHolen() {
     status("Stimme liegt im Browserspeicher — es wird nichts erneut geladen.");
   } else {
     status("Stimme wird geholt …");
+    stimmeStart = performance.now();
   }
-  fortschritt(imSpeicher ? null : 0);
+  fortschritt(imSpeicher ? null : 0, "stimme");
   ablauf.postMessage({ type: "stimme-laden", url: adresse, name: s.kennung });
 }
 
@@ -256,20 +308,6 @@ async function stimmkatalogLaden() {
 
 /* --------------------------------------------------------------- Ausgabe */
 
-function abspielen(daten) {
-  const proben = daten.samples;
-  const rate = daten.sampleRate;
-  if (!audioKontext) {
-    audioKontext = new AudioContext({ sampleRate: rate });
-  }
-  const puffer = audioKontext.createBuffer(1, proben.length, rate);
-  puffer.getChannelData(0).set(proben);
-  const quelle = audioKontext.createBufferSource();
-  quelle.buffer = puffer;
-  quelle.connect(audioKontext.destination);
-  quelle.start();
-}
-
 function wavBauen(proben, rate) {
   const werte = new Int16Array(proben.length);
   for (let i = 0; i < proben.length; ++i) {
@@ -305,6 +343,29 @@ function nameSaeubern(text) {
   return text.replace(/[^a-zA-Z0-9._-]+/g, "-").slice(0, 60);
 }
 
+/* Ein Abspieler je Vorlesung: flacher Streifen statt der eingebauten
+ * Abspielleiste (die ist rund 54 px hoch, hier sind es rund 18 px).
+ *
+ * Es läuft immer nur eine Vorlesung. Beim Start hält alleAnhalten() alle
+ * anderen an — die eingebaute Leiste konnte das nicht, weil jeder Abspieler
+ * für sich stand.
+ *
+ * Nach dem Erzeugen wird gleich abgespielt, wenn das Gerät es zulässt (die
+ * Person hat "Vorlesen" geklickt). Verlangt es einen Klick, sagt das der Titel
+ * der Karte — es bleibt nie still und unerklärt.
+ */
+function alleAnhalten(ausser) {
+  for (const s of spieler) {
+    if (s !== ausser) s.pause();
+  }
+}
+
+function uhr(sekunden) {
+  if (!Number.isFinite(sekunden) || sekunden < 0) return "0:00";
+  const ganz = Math.floor(sekunden);
+  return Math.floor(ganz / 60) + ":" + String(ganz % 60).padStart(2, "0");
+}
+
 function clipAnlegen(daten) {
   const weile = wavBauen(daten.samples, daten.sampleRate);
   const anfang = ELEMENTE.text.value.trim().substring(0, 80);
@@ -313,11 +374,85 @@ function clipAnlegen(daten) {
 
   const karte = document.createElement("div");
   karte.className = "clip";
+
   const kopf = document.createElement("p");
   kopf.textContent = beschriftung;
+
   const ton = document.createElement("audio");
-  ton.controls = true;
   ton.src = URL.createObjectURL(weile);
+  ton.preload = "metadata";
+
+  const streifen = document.createElement("div");
+  streifen.className = "abspieler";
+
+  const knopf = document.createElement("button");
+  knopf.type = "button";
+  knopf.className = "knopf-play";
+  knopf.textContent = "▶";
+  knopf.setAttribute("aria-label", "Abspielen");
+
+  const lauf = document.createElement("input");
+  lauf.type = "range";
+  lauf.className = "lauf";
+  lauf.min = "0";
+  lauf.max = "1000";
+  lauf.step = "1";
+  lauf.value = "0";
+  lauf.setAttribute("aria-label", "Position in der Vorlesung");
+
+  const zeit = document.createElement("span");
+  zeit.className = "zeit";
+  zeit.textContent = "0:00 / 0:00";
+
+  const anzeigen = () => {
+    zeit.textContent = uhr(ton.currentTime) + " / " + uhr(ton.duration);
+  };
+
+  ton.addEventListener("play", () => {
+    alleAnhalten(ton); // erst die anderen anhalten, dann läuft dieser
+    knopf.textContent = "❚❚";
+    knopf.setAttribute("aria-label", "Anhalten");
+  });
+  ton.addEventListener("pause", () => {
+    knopf.textContent = "▶";
+    knopf.setAttribute("aria-label", "Abspielen");
+  });
+  ton.addEventListener("ended", () => {
+    knopf.textContent = "▶";
+    knopf.setAttribute("aria-label", "Abspielen");
+    lauf.value = "0";
+    anzeigen();
+  });
+  ton.addEventListener("loadedmetadata", anzeigen);
+  ton.addEventListener("timeupdate", () => {
+    if (Number.isFinite(ton.duration) && ton.duration > 0) {
+      lauf.value = String(Math.round((ton.currentTime / ton.duration) * 1000));
+    }
+    anzeigen();
+  });
+
+  knopf.onclick = () => {
+    if (ton.paused) {
+      ton.play().catch(() => {
+        kopf.textContent = beschriftung + " — zum Anhören ▶ drücken";
+      });
+    } else {
+      ton.pause();
+    }
+  };
+
+  lauf.oninput = () => {
+    if (Number.isFinite(ton.duration) && ton.duration > 0) {
+      ton.currentTime = (parseInt(lauf.value, 10) / 1000) * ton.duration;
+      anzeigen();
+    }
+  };
+
+  streifen.append(knopf, lauf, zeit);
+
+  const knoepfe = document.createElement("div");
+  knoepfe.className = "knoepfe";
+
   const sichern = document.createElement("button");
   sichern.textContent = "Sichern";
   sichern.className = "zweit";
@@ -331,15 +466,25 @@ function clipAnlegen(daten) {
     document.body.removeChild(verweis);
     URL.revokeObjectURL(adresse);
   };
+
   const loeschen = document.createElement("button");
   loeschen.textContent = "Löschen";
   loeschen.className = "zweit";
   loeschen.onclick = () => {
+    ton.pause();
+    spieler = spieler.filter((s) => s !== ton);
     URL.revokeObjectURL(ton.src);
     karte.remove();
   };
-  karte.append(kopf, ton, sichern, loeschen);
+
+  knoepfe.append(sichern, loeschen);
+  karte.append(kopf, streifen, knoepfe);
   ELEMENTE.klippe.prepend(karte);
+  spieler.push(ton);
+
+  ton.play().catch(() => {
+    kopf.textContent = beschriftung + " — zum Anhören ▶ drücken";
+  });
 }
 
 /* ------------------------------------------------------------------ Start */
@@ -366,7 +511,8 @@ ELEMENTE.stimme.onchange = () => {
     geladeneKennung = null;
     erzeugungsStatus("");
     status("Stimme wird gewechselt …");
-    fortschritt(0);
+    stimmeStart = performance.now();
+    fortschritt(0, "stimme");
     arbeiterStarten(); // lädt die neue Stimme und startet neu
   }
 };
@@ -379,7 +525,10 @@ ELEMENTE.vorlesen.onclick = () => {
   }
   zeigeFehler("");
   ELEMENTE.vorlesen.disabled = true;
+  erzeugungStart = performance.now();
+  erzeugungAnteil = null;
   erzeugungsStatus("Wird erzeugt …");
+  erzeugungUhrStarten();
   fortschritt(0);
   const stimmung = ELEMENTE.stimmungZeile.style.display === "none"
     ? 0

@@ -13,12 +13,17 @@ weiteren Download (und auch den nur einmal).
    soll — ein Satz, ein Absatz, ein Gedicht.
 2. **Tempo einstellen** (Voreinstellung 1,0). Mit dem Regler wird es langsamer
    (unter 1,0) oder schneller (über 1,0).
-3. **Vorlesen anklicken.** Nach kurzer Rechenzeit erscheint unten ein Abspielgerät.
-   Dort steht *Sichern* zum Herunterladen der Audiodatei und *Löschen* zum
-   Wegwerfen — beides bezieht sich nur auf die Ablage im Tab.
+3. **Vorlesen anklicken.** Während gerechnet wird, läuft unter dem Knopf ein
+   Balken mit dem echten Fortschritt (Prozent) und einer Schätzung der Restzeit
+   („noch etwa 6 s"). Danach erscheint unten ein Abspielgerät: ein flacher
+   Streifen mit Abspielen/Anhalten, Positionsregler und Zeitangabe. *Sichern*
+   lädt die Audiodatei herunter, *Löschen* wirft sie weg — beides bezieht sich
+   nur auf die Ablage im Tab.
 
-Mehrere Texte hintereinander erzeugen ist möglich: jeder Durchlauf legt ein
-eigenes Abspielgerät an, so lassen sich Fassungen vergleichen.
+**Immer nur eine Vorlesung.** Mehrere Texte hintereinander erzeugen ist möglich;
+jeder Durchlauf legt ein eigenes Abspielgerät an, so lassen sich Fassungen
+vergleichen. Sobald du eine davon startest, hält die vorige an — es laufen nie
+zwei gleichzeitig.
 
 **Stimme und Stimmung.** Oben wählst du die Stimme. Unter der Liste steht zu
 jeder, woher sie kommt, wie fein sie aufgenommen ist und wie groß der einmalige
@@ -32,8 +37,9 @@ Download ist:
 - *Thorsten — kleinste Datei:* für langsame Verbindungen und ältere Geräte.
 - *Kerstin:* eine Frauenstimme.
 
-Während des Ladens zeigt die Seite den Fortschritt in Prozent und Megabyte an —
-echte Zahlen aus der laufenden Übertragung. Ist die Stimme schon im Speicher,
+Während des Ladens zeigt die Seite den Fortschritt in Prozent und Megabyte an
+(eigener Balken direkt unter der Stimmenwahl) — echte Zahlen aus der laufenden
+Übertragung, dazu eine Schätzung der Restzeit. Ist die Stimme schon im Speicher,
 steht das dort ausdrücklich („es wird nichts erneut geladen").
 
 ## Dateien und Daten

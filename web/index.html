@@ -42,19 +42,43 @@
     .zeile { margin-bottom: 0.75rem; }
     .klein { font-size: 0.85rem; color: #5a6b78; }
     #stimmenBeschreibung { margin-top: 0.35rem; max-width: 34rem; }
-    #balken {
+    .balken {
       display: none; height: 8px; background: #e6ebef; border-radius: 4px;
       overflow: hidden; margin-top: 0.5rem; max-width: 34rem;
     }
-    #balkenFuellung { height: 100%; width: 0; background: #1f6f43; transition: width 0.15s linear; }
+    .balken > div { height: 100%; width: 0; background: #1f6f43; transition: width 0.15s linear; }
     #fehler {
       display: none; margin-top: 0.75rem; padding: 0.6rem 0.75rem;
       background: #fdecea; border: 1px solid #f2b8b0; border-radius: 6px;
       color: #8a1f11; font-size: 0.9rem; white-space: pre-wrap;
     }
-    .clip { border-top: 1px solid #e6ebef; padding-top: 0.75rem; margin-top: 0.75rem; }
-    .clip p { margin: 0.35rem 0; font-size: 0.9rem; color: #4a5b68; }
-    .clip audio { width: 100%; }
+    .clip { border-top: 1px solid #e6ebef; padding-top: 0.6rem; margin-top: 0.6rem; }
+    .clip p { margin: 0.2rem 0; font-size: 0.9rem; color: #4a5b68; }
+    .clip .knoepfe { display: flex; gap: 0.4rem; margin-top: 0.3rem; }
+
+    /* Der Abspieler ist ein flacher Streifen, keine eingebaute Abspielleiste.
+       Die eingebaute ist rund 54 px hoch; hier sind es rund 18 px. */
+    .abspieler { display: flex; align-items: center; gap: 0.45rem; height: 18px; }
+    .abspieler .knopf-play {
+      flex: 0 0 auto; width: 18px; height: 18px; padding: 0; border-radius: 50%;
+      font-size: 9px; line-height: 1; display: flex; align-items: center;
+      justify-content: center;
+    }
+    .abspieler .lauf {
+      flex: 1 1 auto; height: 3px; margin: 0; padding: 0; cursor: pointer;
+      background: #e6ebef; border-radius: 2px; -webkit-appearance: none; appearance: none;
+    }
+    .abspieler .lauf::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 9px; height: 9px; border: 0;
+      border-radius: 50%; background: #1f6f43;
+    }
+    .abspieler .lauf::-moz-range-thumb {
+      width: 9px; height: 9px; border: 0; border-radius: 50%; background: #1f6f43;
+    }
+    .abspieler .zeit {
+      flex: 0 0 auto; font-size: 0.68rem; color: #5a6b78;
+      font-variant-numeric: tabular-nums; min-width: 5.2rem; text-align: right;
+    }
   </style>
 </head>
 
@@ -73,6 +97,7 @@
         <option>Stimmen werden geladen …</option>
       </select>
       <div id="stimmenBeschreibung" class="klein"></div>
+      <div class="balken" id="stimmenBalken"><div id="stimmenFuellung"></div></div>
     </div>
 
     <div class="zeile" id="stimmungZeile" style="display: none;">
@@ -91,7 +116,6 @@
     </div>
 
     <div id="status">Wird geladen …</div>
-    <div id="balken"><div id="balkenFuellung"></div></div>
 
     <div class="zeile" style="margin-top: 0.9rem;">
       <label for="text">Text</label><br>
@@ -101,6 +125,7 @@
       <button id="generateBtn" disabled>Vorlesen</button>
     </div>
     <div id="generationStatus" style="display: none;"></div>
+    <div class="balken" id="balken"><div id="balkenFuellung"></div></div>
     <div id="fehler"></div>
   </div>
 
