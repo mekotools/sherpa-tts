@@ -1,0 +1,55 @@
+{
+  "fassung": "unbekannt",
+  "vorgabe": "thorsten_gefuehl",
+  "stimmen": [
+    {
+      "kennung": "thorsten_gefuehl",
+      "datei": "thorsten_gefuehl-cad56636.onnx",
+      "groesse": 21995283,
+      "pruefsumme": "cad566364a227548f87b333ea8f70ba8e96618d3110010dc065a9448a2244873",
+      "name": "Thorsten — acht Stimmungen",
+      "beschreibung": "Sprecher Thorsten, mit acht auswählbaren Stimmungen (siehe Liste darunter). Piper-Stufe medium, Abtastrate 22.050 Hz. Datensatz Thorsten-Voice, Lizenz CC0.",
+      "abtastrate": 22050,
+      "stimmungen": {
+        "4": "neutral",
+        "1": "wütend",
+        "0": "amüsiert",
+        "2": "angewidert",
+        "3": "betrunken",
+        "5": "schläfrig",
+        "6": "überrascht",
+        "7": "flüsternd"
+      }
+    },
+    {
+      "kennung": "thorsten_klar",
+      "datei": "thorsten_klar-e0d7cde1.onnx",
+      "groesse": 37366234,
+      "pruefsumme": "e0d7cde12d3da0e261ff4aa6d550cee5fb7e37cbfab791343e41577b786d5e73",
+      "name": "Thorsten — höchste Klangtreue",
+      "beschreibung": "Sprecher Thorsten, eine Stimmung. Piper-Stufe high, Abtastrate 22.050 Hz. Der größte Download der Auswahl, dafür die deutlichste Aussprache. Datensatz Thorsten-Voice, Lizenz CC0.",
+      "abtastrate": 22050,
+      "stimmungen": {}
+    },
+    {
+      "kennung": "thorsten_klein",
+      "datei": "thorsten_klein-264f5b1d.onnx",
+      "groesse": 18555534,
+      "pruefsumme": "264f5b1d689355b0e0bb37ea6a4cd019e737955e1748138d251c2de139293a89",
+      "name": "Thorsten — kleinste Datei",
+      "beschreibung": "Sprecher Thorsten, eine Stimmung. Piper-Stufe low, Abtastrate 16.000 Hz. Kleinster Download der Auswahl — für langsame Verbindungen und ältere Geräte. Datensatz Thorsten-Voice, Lizenz CC0.",
+      "abtastrate": 16000,
+      "stimmungen": {}
+    },
+    {
+      "kennung": "kerstin",
+      "datei": "kerstin-d1a9d6a3.onnx",
+      "groesse": 18555529,
+      "pruefsumme": "d1a9d6a3db8484a8c0f2019388b42c3801daa8847c2b082524d10bcedf879e6a",
+      "name": "Kerstin — Frauenstimme",
+      "beschreibung": "Sprecherin Kerstin, eine Stimmung. Piper-Stufe low, Abtastrate 16.000 Hz. Datensatz dataset-voice-kerstin (Muttersprachlerin, weiblich, 1.374 Aufnahmen), Lizenz CC0.",
+      "abtastrate": 16000,
+      "stimmungen": {}
+    }
+  ]
+}

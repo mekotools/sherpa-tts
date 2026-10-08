@@ -41,15 +41,21 @@ RUN wget -q -O /tmp/m.tar.bz2 "${BASIS}/${GRUNDPAKET}.tar.bz2" \
  && ls -R /assets | head -20
 
 FROM python:3.12-alpine AS stimmen
+# FASSUNG wird nicht mehr gebraucht (die Stimmenliste ist eingecheckt), bleibt
+# aber als Bauargument bestehen, damit die Arbeitsablaeufe unveraendert laufen.
 ARG FASSUNG=unbekannt
-RUN apk add --no-cache ca-certificates
 WORKDIR /arbeit
 COPY stimmen /arbeit/stimmen
-# Ein fehlendes Modell bricht den Bau ab: eine angekündigte Stimme, die nicht da
-# ist, wäre ein Schalter ohne Wirkung.
-RUN python3 /arbeit/stimmen/stimmen_holen.py /arbeit/stimmen/katalog.json /eingang \
- && mkdir -p /stimmen \
- && FASSUNG="${FASSUNG}" python3 /arbeit/stimmen/stimmen_manifest.py /eingang /stimmen /arbeit/stimmen/katalog.json \
+# Die Stimmen selbst werden nicht mehr mitgebaut: zusammen sind sie 89 MB, und
+# ausgeliefert werden sie ohnehin vom VPS (Repo mekotools-modelle holt sie vom
+# amtlichen Release und prueft sie gegen diese Liste). Ins Bild kommt nur die
+# Liste — damit auch ein Aufsatz ohne die Weiterleitung die Auswahl kennt.
+# Die Liste ist eingecheckt und wird hier gegen den Katalog geprueft: ein
+# Katalog, der eine Stimme ankuendigt, die die Liste nicht kennt, bricht den Bau
+# ab — statt erst im Klassenzimmer aufzufallen.
+RUN mkdir -p /stimmen \
+ && cp /arbeit/stimmen/stimmen.json /stimmen/stimmen.json \
+ && python3 /arbeit/stimmen/stimmen_katalog_pruefen.py /stimmen/stimmen.json /arbeit/stimmen/katalog.json \
  && ls -la /stimmen
 
 FROM emscripten/emsdk:4.0.23 AS wasm
