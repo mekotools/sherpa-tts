@@ -132,7 +132,30 @@ self.onmessage = async (e) => {
   }
   if (type == "generate") {'
 
-# 3. Fehlermeldungen auf Deutsch (sie landen sichtbar in der Oberflaeche).
+# 3. Fortschritt auch beim einfachen Erzeugen melden.
+# Der Rueckruf war nur im Zweig "generateWithConfig" gesetzt; die Oberflaeche
+# schickt aber "generate". Folge: der Balken blieb bei 0 % stehen und die
+# Restzeit erschien nie (am 08.10.2026 auf der lebenden Seite gemessen).
+pruefe_und_ersetze \
+'      const audio = tts.generate({
+        text: text,
+        sid: sid || 0,
+        speed: speed || 1.0,
+      });' \
+'      // MekoTools: mit Rueckruf, damit echter Fortschritt gemeldet wird.
+      const audio = tts.generateWithConfig(text, {
+        sid: sid || 0,
+        speed: speed || 1.0,
+        callback: (samples, n, progress) => {
+          self.postMessage({
+            type: "sherpa-onnx-tts-generation-progress",
+            progress: progress,
+          });
+          return 1;
+        },
+      });'
+
+# 4. Fehlermeldungen auf Deutsch (sie landen sichtbar in der Oberflaeche).
 pruefe_und_ersetze '"Generation failed: "' '"Die Erzeugung ist fehlgeschlagen: "' 2
 
-echo "  Arbeiter angepasst: Stimme wird beim Aufruf geladen"
+echo "  Arbeiter angepasst: Stimme wird beim Aufruf geladen, Fortschritt gemeldet"
