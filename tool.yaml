@@ -7,6 +7,10 @@ themen:
 - creation
 unterthemen:
 - creation/audio
+stufe: 2
+schlagworte:
+- ton
+- sprache-text
 laufzeit: browser
 betrieb: eigen
 reifegrad: stabil
