@@ -1,10 +1,12 @@
 name: Abbild bauen
 
-# Baut das fertige Abbild und legt es in der Registry ab. Der Lauf holt zur
-# Bauzeit die amtliche Stimme (Modell-Release tts-models) und uebersetzt
-# sherpa-onnx mit emscripten; die Stimme wird dabei in die WebAssembly-Datei
-# eingebettet. Weil der Lauf INNERHALB dieses oeffentlichen Repos schiebt,
-# entsteht das Paket in GHCR oeffentlich und ist anonym ziehbar.
+# Baut das fertige Abbild und legt es in der Registry ab. Der Lauf uebersetzt
+# sherpa-onnx mit emscripten; die Aussprachedaten kommen aus einem kleinen
+# amtlichen Modellpaket. Die vier Vorlese-Stimmen holt der Bau NICHT mehr: sie
+# sind zusammen 89 MB und werden vom VPS ausgeliefert (Repo mekotools-modelle,
+# das sie vom amtlichen Release holt und gegen die eingecheckte Liste prueft).
+# Weil der Lauf INNERHALB dieses oeffentlichen Repos schiebt, entsteht das Paket
+# in GHCR oeffentlich und ist anonym ziehbar.
 
 on:
   push:
