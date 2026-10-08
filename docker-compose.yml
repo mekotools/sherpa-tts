@@ -1,0 +1,28 @@
+# MekoTools: Vorlesen — Stapel fuer flip
+#
+# Ablage auf dem Zielhost: /poolio/docker/mekotools-sherpa-tts/docker-compose.yml
+# Start:  cd /poolio/docker/mekotools-sherpa-tts && docker compose up -d
+#
+# Feste Fassung: das Abbild wird ueber seinen Inhaltswert (Digest) festgenagelt,
+# nicht ueber :latest — ein neuer Bau aendert das laufende Werkzeug dann nicht
+# von selbst.
+#
+# Dienst: nginx liefert die statische Seite aus, Port 80 im Behaelter.
+# Keine Datenablage, keine Geheimnisse, keine Umgebungsvariablen.
+
+services:
+  web:
+    image: ghcr.io/mekotools/sherpa-tts@sha256:b515b98075599ffb70637054bb67df93c1cdf6bae71d0faddbeeb08e310fbae3
+    container_name: mekotools-sherpa-tts
+    restart: unless-stopped
+    networks: [coolify]
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=coolify
+      - traefik.http.routers.mekotools-sherpa-tts.rule=Host(`sherpa-tts.mekotools.de`)
+      - traefik.http.routers.mekotools-sherpa-tts.entrypoints=http
+      - traefik.http.services.mekotools-sherpa-tts.loadbalancer.server.port=80
+
+networks:
+  coolify:
+    external: true

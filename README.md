@@ -29,8 +29,13 @@ ohne Anmeldung, ohne Upload. Selbst betrieben unter <https://sherpa-tts.mekotool
 ## Bauen und betreiben
 
 - Gebaut wird **in der CI**, nicht auf dem Zielhost: `.forgejo/workflows/abbild.yml`
-  (eigener Läufer auf flip) und `.github/workflows/abbild.yml` (Spiegel; legt das
-  Paket in GHCR an und macht es damit öffentlich ziehbar).
+  (eigener Läufer auf flip, nur von Hand auslösbar) und `.github/workflows/abbild.yml`
+  (Spiegel, der eigentliche Bauweg; legt das Paket in GHCR ab).
+- **Einmalig nach dem ersten Bau:** das Paket liegt in GHCR zunächst privat. Die
+  Sichtbarkeit lässt sich über die Schnittstelle **nicht** ändern (für Pakete einer
+  Organisation gibt es keinen solchen Endpunkt) — also im Web umstellen:
+  `https://github.com/orgs/mekotools/packages/container/sherpa-tts/settings`
+  → Danger Zone → Change visibility → Public. Danach bleibt es öffentlich.
 - Festgenagelte Fassungen: sherpa-onnx `99ddefaa9212`, emscripten `4.0.23`,
   onnxruntime (wasm, simd) `1.28.2`, Stimme `vits-piper-de_DE-thorsten_emotional-medium`,
   Auslieferung `nginx:alpine-slim`.
