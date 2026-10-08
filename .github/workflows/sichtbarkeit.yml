@@ -1,0 +1,50 @@
+name: Paket oeffentlich stellen
+
+# Zweck: das GHCR-Paket anonym ziehbar machen. Der eigene Zugangstoken des
+# Agenten hat kein `packages:write`, deshalb laeuft die Aenderung hier mit dem
+# Token des Repos. Der Ablauf ist idempotent — ist das Paket schon oeffentlich,
+# aendert der Aufruf nichts.
+#
+# Laeuft nach jedem erfolgreichen Bau und laesst sich jederzeit von Hand
+# ausloesen (Actions -> Paket oeffentlich stellen -> Run workflow).
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Abbild bauen"]
+    types: [completed]
+
+jobs:
+  sichtbarkeit:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Sichtbarkeit auf oeffentlich stellen
+        env:
+          KENNUNG: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -u
+          CODE=$(curl -sS -o /tmp/antwort.json -w '%{http_code}' -X PATCH \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token $KENNUNG" \
+            -d '{"visibility":"public"}' \
+            "https://api.github.com/orgs/mekotools/packages/container/sherpa-tts")
+          echo "Antwortcode: $CODE"
+          cat /tmp/antwort.json; echo
+          case "$CODE" in
+            200|204) echo "Sichtbarkeit gesetzt." ;;
+            *) echo "FEHLER: Sichtbarkeit konnte nicht gesetzt werden."; exit 1 ;;
+          esac
+
+      - name: Anonymer Abruf zur Kontrolle
+        run: |
+          set -u
+          TOK=$(curl -sS "https://ghcr.io/token?scope=repository:mekotools/sherpa-tts:pull&service=ghcr.io" \
+            | python3 -c "import json,sys; print(json.load(sys.stdin)['token'])")
+          A=$(curl -sS -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOK" \
+            -H 'Accept: application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json' \
+            https://ghcr.io/v2/mekotools/sherpa-tts/manifests/latest)
+          echo "Anonymer Manifest-Abruf: $A (200 = oeffentlich ziehbar)"
+          test "$A" = "200"
