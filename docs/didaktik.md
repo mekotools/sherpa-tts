@@ -50,8 +50,12 @@ Deutsch, Musik, fächerübergreifend.
 
 ## Grenzen — was man wissen muss
 
-- **Eine Stimme, keine Sprecherwahl.** Ein Vergleich verschiedener Computerstimmen
-  ist mit diesem Werkzeug nicht möglich (dafür wäre ein anderes Angebot nötig).
+- **Vier Stimmen zur Wahl, kein ganzer Markt.** Es stehen zwei Sprecher (Thorsten,
+  Kerstin) in vier Fassungen zur Verfügung — genug, um Klangtreue und Dateigröße
+  nebeneinanderzustellen, aber kein Vergleich über verschiedene Anbieter hinweg.
+- **Eine Fassung rechnet zur Zeit.** Wer die Stimme wechselt, lädt die neue Fassung
+  einmal nach (17–36 MB); danach bleibt sie gespeichert. Zwei Stimmen zugleich
+  gegenüberzustellen geht nur nacheinander.
 - **Keine Steuerung der Betonung.** Was bei einem geschriebenen Satz unbeholfen
   klingt, muss nicht am Werkzeug liegen — aber man kann es auch nicht
   nachjustieren, nur den Text ändern.
