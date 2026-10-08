@@ -236,6 +236,21 @@ async function stimmkatalogLaden() {
   ELEMENTE.stimme.disabled = false;
   stimmeBeschreiben();
   stimmungAnzeigen();
+  // Erst starten, wenn der Zwischenspeicher arbeitet. Sonst holt der Arbeiter
+  // die Stimme an ihm vorbei, und der naechste Besuch laedt sie erneut
+  // (gemessen am 08.10.2026: 21,99 MB beim zweiten Besuch).
+  if ("serviceWorker" in navigator) {
+    try {
+      // Nicht endlos warten: wird der Zwischenspeicher nicht rechtzeitig fertig,
+      // geht es ohne ihn weiter. Eine haengende Seite waere der schlimmere Fehler.
+      await Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise((fertig) => setTimeout(fertig, 10000)),
+      ]);
+    } catch (fehler) {
+      // Ohne Zwischenspeicher laeuft alles weiter, nur ohne Zwischenspeicher.
+    }
+  }
   arbeiterStarten();
 }
 
@@ -345,6 +360,13 @@ ELEMENTE.stimme.onchange = () => {
   stimmungAnzeigen();
   zeigeFehler("");
   if (s.kennung !== geladeneKennung) {
+    // Sofort sperren: der neue Arbeiter hat die Stimme noch nicht. Ohne das
+    // laesst sich "Vorlesen" anklicken und die Anfrage geht ins Leere.
+    ELEMENTE.vorlesen.disabled = true;
+    geladeneKennung = null;
+    erzeugungsStatus("");
+    status("Stimme wird gewechselt …");
+    fortschritt(0);
     arbeiterStarten(); // lädt die neue Stimme und startet neu
   }
 };
