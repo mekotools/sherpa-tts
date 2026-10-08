@@ -46,18 +46,31 @@ jobs:
           echo "Gebaut: ghcr.io/mekotools/sherpa-tts:${{ github.sha }}"
           docker buildx imagetools inspect ghcr.io/mekotools/sherpa-tts:latest || true
 
-      - name: Sichtbarkeit oeffentlich stellen und nachsehen
+      - name: Sichtbarkeit des Pakets nachsehen
+        # Die Sichtbarkeit eines Pakets laesst sich NICHT ueber die Schnittstelle
+        # aendern — es gibt fuer Pakete einer Organisation keinen solchen Endpunkt
+        # (Abrufen, Loeschen, Wiederherstellen, Fassungen: ja; Aendern: nein).
+        # Das Paket entsteht beim ersten Schieben daher privat und wird einmalig
+        # im Web auf oeffentlich gestellt:
+        #   https://github.com/orgs/mekotools/packages/container/sherpa-tts/settings
+        #   -> Danger Zone -> Change visibility -> Public
+        # Danach bleibt es bei weiteren Bauvorgaengen oeffentlich. Der Schritt
+        # unten scheitert bewusst NICHT, sondern meldet nur den Ist-Zustand.
         env:
           KENNUNG: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -u
-          CODE=$(curl -sS -o /tmp/antwort.json -w '%{http_code}' -X PATCH \
-            -H "Accept: application/vnd.github+json" \
+          S=$(curl -s -H "Accept: application/vnd.github+json" \
             -H "Authorization: token $KENNUNG" \
-            -d '{"visibility":"public"}' \
-            "https://api.github.com/orgs/mekotools/packages/container/sherpa-tts")
-          echo "Antwortcode der Sichtbarkeitsaenderung: $CODE"
-          cat /tmp/antwort.json; echo
-          curl -s -H "Authorization: token $KENNUNG" -H "Accept: application/vnd.github+json" \
             "https://api.github.com/orgs/mekotools/packages/container/sherpa-tts" \
-            | python3 -c "import json,sys; d=json.load(sys.stdin); print('Sichtbarkeit jetzt:', d.get('visibility'))"
+            | python3 -c "import json,sys; print(json.load(sys.stdin).get('visibility'))" 2>/dev/null || echo "unbekannt")
+          echo "Sichtbarkeit des Pakets: $S"
+          if [ "$S" != "public" ]; then
+            echo "::warning::Paket ist nicht oeffentlich. Einmalig umstellen: https://github.com/orgs/mekotools/packages/container/sherpa-tts/settings"
+          fi
+          TOK=$(curl -s "https://ghcr.io/token?scope=repository:mekotools/sherpa-tts:pull&service=ghcr.io" \
+            | python3 -c "import json,sys; print(json.load(sys.stdin)['token'])")
+          A=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOK" \
+            -H 'Accept: application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json' \
+            https://ghcr.io/v2/mekotools/sherpa-tts/manifests/latest)
+          echo "Anonymer Abruf des Pakets: $A (200 = jeder kann es ziehen)"
