@@ -1,8 +1,10 @@
-name: Abbild bauen und nach GHCR schieben
+name: Abbild bauen und nach GHCR schieben (eigener Läufer, nur von Hand)
 
+# Hausregel: Quelle ist Forgejo, gebaut wird auf GitHub (dort laufen die
+# erprobten Läufer mit mehr Kernen). Dieser Ablauf bleibt als Rückfallweg
+# bestehen und wird NUR von Hand ausgelöst — ein Push soll auf flip keinen
+# dreißigminütigen emscripten-Bau anstoßen.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 # Das Arbeitsabbild ist absichtlich schlank (docker:27-cli, Alpine): docker und
