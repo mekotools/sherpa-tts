@@ -1,0 +1,56 @@
+name: Abbild bauen und nach GHCR schieben
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Das Arbeitsabbild ist absichtlich schlank (docker:27-cli, Alpine): docker und
+# buildx sind drin, bash und node nicht. Deshalb ausdruecklich sh als Schale und
+# Quelltext per git holen statt mit actions/checkout (das braucht node).
+defaults:
+  run:
+    shell: sh
+
+env:
+  ABBILD: ghcr.io/mekotools/sherpa-tts
+
+jobs:
+  abbild:
+    # Eigener Laeufer auf flip (forgejo-runner), Etikett "docker".
+    # Der Bau uebersetzt sherpa-onnx mit emscripten — das dauert; auf flip
+    # stehen 6 Kerne und 62 GB Arbeitsspeicher zur Verfuegung.
+    runs-on: docker
+    timeout: 3h
+    steps:
+      - name: Quelle holen
+        run: |
+          git config --global --add safe.directory '*'
+          git clone --quiet "${{ github.server_url }}/${{ github.repository }}.git" . || \
+            git clone --quiet "${{ github.repository }}.git" .
+          git checkout --quiet "${{ github.sha }}"
+          git log --oneline -1
+          ls -la
+
+      - name: An GHCR anmelden
+        run: |
+          echo "${{ secrets.GHCR_TOKEN }}" | \
+            docker login ghcr.io -u "${{ secrets.GHCR_BENUTZER }}" --password-stdin
+
+      - name: Bauen
+        run: |
+          docker build \
+            -t "$ABBILD:${{ github.sha }}" \
+            -t "$ABBILD:latest" \
+            -f Dockerfile .
+
+      - name: Schieben
+        run: |
+          docker push "$ABBILD:${{ github.sha }}"
+          docker push "$ABBILD:latest"
+
+      - name: Nachweis
+        run: |
+          docker image inspect "$ABBILD:latest" --format 'Abbild {{.Id}} | Groesse {{.Size}} Bytes'
+          docker run --rm "$ABBILD:latest" sh -c 'ls -la /usr/share/nginx/html'
+          docker run --rm "$ABBILD:latest" sh -c 'grep -c . /usr/share/nginx/html/index.html'

@@ -1,0 +1,57 @@
+schema_version: 1
+id: mekotools-sherpa-tts
+titel: Vorlesen
+kurzbeschreibung: 'Text vorlesen lassen: deutsche Stimme im Browser, ohne Anmeldung.
+  Das Rechnen geschieht auf dem eigenen Geraet — nichts wird hochgeladen.'
+themen:
+- creation
+unterthemen:
+- creation/audio
+laufzeit: browser
+betrieb: eigen
+reifegrad: stabil
+aufwand_lehrkraft: niedrig
+zugang:
+  art: offen
+zielgruppe:
+- primar
+- sek1
+- sek2
+- berufsschule
+geraete:
+- desktop
+- tablet
+kamera: nein
+mikrofon: nein
+bildungsbezug:
+  kompetenzen:
+  - produzieren-praesentieren
+  - suchen-verarbeiten
+  - analysieren-reflektieren
+  faecher:
+  - deutsch
+  - faecheruebergreifend
+  - musik
+  lernziele:
+  - Die Lernenden koennen einen geschriebenen Text in gesprochene Sprache umwandeln
+    und das Ergebnis beurteilen.
+  - Die Lernenden koennen benennen, woran sich vorgelesene Computerstimmen erkennen
+    lassen (gleichmaessiger Rhythmus, seltene Betonungsfehler).
+  - Die Lernenden koennen begruenden, warum eine Stimme aus dem Geraet datenschutzfreundlicher
+    ist als ein Vorlesedienst im Netz.
+technik:
+  artefakte:
+  - typ: image
+    referenz: ghcr.io/mekotools/sherpa-tts:latest
+    sichtbarkeit: public
+    geprueft_am: '2026-10-08'
+  dienst_url: https://sherpa-tts.mekotools.de
+  port: 80
+  quellcode: https://github.com/k2-fsa/sherpa-onnx
+  lizenz: Apache-2.0
+  lizenz_link: https://github.com/k2-fsa/sherpa-onnx/blob/master/LICENSE
+doku:
+  anleitung: docs/anleitung.md
+  didaktik: docs/didaktik.md
+  unterrichtsentwurf: docs/unterrichtsentwurf.md
+stand: '2026-10-08'

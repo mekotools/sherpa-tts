@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vorlesen — Text zu Sprache im Browser</title>
+  <style>
+    :root { color-scheme: light; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background-color: #f4f6f8; color: #23303a;
+      display: flex; flex-direction: column; align-items: center;
+      margin: 0; padding: 1rem; min-height: 100vh; box-sizing: border-box;
+    }
+    main { width: 100%; max-width: 900px; }
+    h1 { font-size: 1.5rem; margin: 0.5rem 0 0.25rem; }
+    .unterzeile { color: #5a6b78; font-size: 0.95rem; margin-bottom: 1rem; }
+    .karte {
+      background: #fff; padding: 1.25rem; border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 1rem;
+    }
+    #singleAudioContent { display: block; }
+    .loading { display: none !important; }
+    .hidden { display: none !important; }
+    label { font-weight: 600; }
+    textarea { width: 100%; box-sizing: border-box; font: inherit; padding: 0.6rem; border: 1px solid #c3ccd4; border-radius: 6px; }
+    input[type="text"] { width: 5rem; font: inherit; padding: 0.35rem; border: 1px solid #c3ccd4; border-radius: 6px; }
+    input[type="range"] { vertical-align: middle; width: 60%; }
+    button {
+      font: inherit; font-weight: 600; padding: 0.55rem 1.2rem;
+      background: #1f6f43; color: #fff; border: 0; border-radius: 6px; cursor: pointer;
+    }
+    button:disabled { background: #9aabb6; cursor: default; }
+    #status { color: #5a6b78; }
+    #generationStatus { margin-top: 0.75rem; font-size: 0.95rem; color: #5a6b78; }
+    h3 { font-size: 1rem; margin: 0 0 0.5rem; }
+    details { font-size: 0.9rem; color: #4a5b68; }
+    details summary { cursor: pointer; font-weight: 600; color: #23303a; }
+    ul { padding-left: 1.1rem; }
+    a { color: #1f6f43; }
+    .zeile { margin-bottom: 0.75rem; }
+  </style>
+</head>
+
+<body>
+<main>
+  <h1>Vorlesen — Text zu Sprache im Browser</h1>
+  <div class="unterzeile">
+    Text eingeben, <em>Vorlesen</em> anklicken, anhören. Die Stimme rechnet auf dem
+    eigenen Gerät; nichts wird hochgeladen, es ist keine Anmeldung nötig.
+  </div>
+
+  <div class="karte">
+    <div id="status">Wird geladen …</div>
+
+    <div id="singleAudioContent" class="tab-content loading">
+      <div id="speakerIdSection" class="zeile">
+        <label for="speakerId" id="speakerIdLabel">Stimm-Nummer: </label>
+        <input type="text" id="speakerId" name="speakerId" value="0">
+      </div>
+
+      <div id="referenceAudioSection" class="hidden zeile">
+        <label for="referenceAudio">Referenz-Aufnahme (.wav): </label>
+        <input type="file" id="referenceAudio" name="referenceAudio" accept=".wav,audio/wav">
+        <div style="font-size: 0.85rem; color: #5a6b78;">
+          Nur <code>.wav</code>-Dateien werden angenommen.
+        </div>
+      </div>
+
+      <div id="referenceTextSection" class="hidden zeile">
+        <label for="referenceText">Text der Referenz-Aufnahme (muss genau dazu passen): </label>
+        <textarea id="referenceText" rows="3" placeholder="Bitte den Text der Referenz-Aufnahme wortgenau eingeben"></textarea>
+      </div>
+
+      <div class="zeile">
+        <label for="speed" id="speedLabel">Tempo: </label>
+        <input type="range" id="speed" name="speed" min="0.4" max="3.5" step="0.1" value="1.0">
+        <span id="speedValue"></span>
+      </div>
+
+      <textarea id="text" rows="10" placeholder="Text zum Vorlesen hier eingeben …"></textarea>
+      <div class="zeile" style="margin-top: 0.75rem;">
+        <button id="generateBtn" disabled>Vorlesen</button>
+      </div>
+      <div id="generationStatus" style="display: none;"></div>
+    </div>
+  </div>
+
+  <section id="sound-clips"></section>
+
+  <div class="karte">
+    <details>
+      <summary>Woher das kommt und wo die Grenzen liegen</summary>
+      <h3 style="margin-top: 0.75rem;">Technik</h3>
+      <ul>
+        <li>Sprachsynthese: <strong>sherpa-onnx</strong> (Apache-2.0), als WebAssembly im Browser.</li>
+        <li>Stimme: <strong>Thorsten</strong> (deutsch, Piper-Modell aus dem amtlichen
+            Modell-Release von sherpa-onnx).</li>
+        <li>Das gesamte Rechnen geschieht auf dem Gerät; die Seite lädt keine fremden
+            Bestandteile, keine Zähl- oder Analysedienste.</li>
+        <li>Nach dem ersten Aufruf lässt sich die Seite sogar ohne Netzverbindung
+            benutzen, solange der Tab offen bleibt.</li>
+      </ul>
+      <h3>Grenzen</h3>
+      <ul>
+        <li><strong>Eine Stimme.</strong> Weitere Stimmen wären ein eigener Bau des
+            Abbilds — die Stimme steckt fest im WebAssembly-Paket.</li>
+        <li><strong>Kein Mikrofon, kein Vorlesen fremder Dateien</strong> als
+            Textgrundlage: es gibt kein Texterkennungs-Verfahren aus Bildern.</li>
+        <li><strong>Lange Texte dauern.</strong> Die Erzeugung läuft in einem Thread;
+            für ganze Kapitel ist das Werkzeug nicht gedacht.</li>
+        <li><strong>Die Betonung ist nicht steuerbar.</strong> Fragen klingen nicht
+            automatisch fragend; Satzzeichen steuern nur Pausen.</li>
+        <li>Erzeugte Audiodateien bleiben im Tab (nicht auf unserem Server). Wer sie
+            behalten will, lädt sie vor dem Schließen herunter.</li>
+      </ul>
+      <h3>Herkunft</h3>
+      <ul>
+        <li>Quelltext: <a href="https://github.com/k2-fsa/sherpa-onnx" rel="noopener">k2-fsa/sherpa-onnx</a>
+            (Apache-2.0), Bau-Rezept nach dem amtlichen WebAssembly-Beispiel.</li>
+        <li>Diese Oberfläche ist die deutsche Fassung der mitgelieferten Beispielseite;
+            sie ist im Werkzeug-Repo dokumentiert.</li>
+      </ul>
+    </details>
+  </div>
+</main>
+
+<script src="app-tts.js"></script>
+</body>
+</html>
