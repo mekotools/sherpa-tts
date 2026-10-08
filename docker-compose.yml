@@ -12,7 +12,7 @@
 
 services:
   web:
-    image: ghcr.io/mekotools/sherpa-tts@sha256:b515b98075599ffb70637054bb67df93c1cdf6bae71d0faddbeeb08e310fbae3
+    image: ghcr.io/mekotools/sherpa-tts@sha256:2042b362592ea91a158e8c54cc502ca507122a6ebc23cd96c54fa99653cccc00
     container_name: mekotools-sherpa-tts
     restart: unless-stopped
     networks: [coolify]
