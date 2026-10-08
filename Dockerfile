@@ -108,7 +108,12 @@ COPY web/index.html web/vorlesen.js web/service-worker.js /usr/share/nginx/html/
 # englisch und bietet die Stimm-Nummer statt einer Stimmenauswahl.
 RUN rm -f /usr/share/nginx/html/app-tts.js
 COPY --from=stimmen /stimmen /usr/share/nginx/html/stimmen/
-COPY web/nginx-vorlesen.conf /etc/nginx/conf.d/vorlesen.conf
+# Die Serverdatei ERSETZT die Vorgabe: zwei Dateien mit je einem Server auf
+# Port 80 wären ein Fehler. Danach wird die Konfiguration geprüft — ein
+# Fehler hier bricht den Bau ab, statt den Behälter in eine Startschleife
+# zu schicken (genau das passierte beim ersten Ausliefern).
+COPY web/nginx-vorlesen.conf /etc/nginx/conf.d/default.conf
+RUN nginx -t
 # Fassung fuer den Zwischenspeicher: aus dem Inhalt der Kerndateien gebildet,
 # damit ein neuer Bau keine alten Programmteile liegen laesst.
 RUN FASSUNG="$(cat /usr/share/nginx/html/sherpa-onnx-wasm-main-tts.js \
