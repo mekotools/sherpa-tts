@@ -19,12 +19,13 @@
       background: #fff; padding: 1.25rem; border-radius: 10px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 1rem;
     }
-    #singleAudioContent { display: block; }
-    .loading { display: none !important; }
-    .hidden { display: none !important; }
     label { font-weight: 600; }
-    textarea { width: 100%; box-sizing: border-box; font: inherit; padding: 0.6rem; border: 1px solid #c3ccd4; border-radius: 6px; }
-    input[type="text"] { width: 5rem; font: inherit; padding: 0.35rem; border: 1px solid #c3ccd4; border-radius: 6px; }
+    select, textarea, input[type="text"] {
+      font: inherit; padding: 0.45rem; border: 1px solid #c3ccd4;
+      border-radius: 6px; background: #fff; color: inherit;
+    }
+    select { width: 100%; max-width: 34rem; }
+    textarea { width: 100%; box-sizing: border-box; padding: 0.6rem; }
     input[type="range"] { vertical-align: middle; width: 60%; }
     button {
       font: inherit; font-weight: 600; padding: 0.55rem 1.2rem;
@@ -33,12 +34,27 @@
     button:disabled { background: #9aabb6; cursor: default; }
     #status { color: #5a6b78; }
     #generationStatus { margin-top: 0.75rem; font-size: 0.95rem; color: #5a6b78; }
-    h3 { font-size: 1rem; margin: 0 0 0.5rem; }
+    h3 { font-size: 1rem; margin: 0.75rem 0 0.5rem; }
     details { font-size: 0.9rem; color: #4a5b68; }
     details summary { cursor: pointer; font-weight: 600; color: #23303a; }
     ul { padding-left: 1.1rem; }
     a { color: #1f6f43; }
     .zeile { margin-bottom: 0.75rem; }
+    .klein { font-size: 0.85rem; color: #5a6b78; }
+    #stimmenBeschreibung { margin-top: 0.35rem; max-width: 34rem; }
+    #balken {
+      display: none; height: 8px; background: #e6ebef; border-radius: 4px;
+      overflow: hidden; margin-top: 0.5rem; max-width: 34rem;
+    }
+    #balkenFuellung { height: 100%; width: 0; background: #1f6f43; transition: width 0.15s linear; }
+    #fehler {
+      display: none; margin-top: 0.75rem; padding: 0.6rem 0.75rem;
+      background: #fdecea; border: 1px solid #f2b8b0; border-radius: 6px;
+      color: #8a1f11; font-size: 0.9rem; white-space: pre-wrap;
+    }
+    .clip { border-top: 1px solid #e6ebef; padding-top: 0.75rem; margin-top: 0.75rem; }
+    .clip p { margin: 0.35rem 0; font-size: 0.9rem; color: #4a5b68; }
+    .clip audio { width: 100%; }
   </style>
 </head>
 
@@ -51,39 +67,41 @@
   </div>
 
   <div class="karte">
-    <div id="status">Wird geladen …</div>
-
-    <div id="singleAudioContent" class="tab-content loading">
-      <div id="speakerIdSection" class="zeile">
-        <label for="speakerId" id="speakerIdLabel">Stimm-Nummer: </label>
-        <input type="text" id="speakerId" name="speakerId" value="0">
-      </div>
-
-      <div id="referenceAudioSection" class="hidden zeile">
-        <label for="referenceAudio">Referenz-Aufnahme (.wav): </label>
-        <input type="file" id="referenceAudio" name="referenceAudio" accept=".wav,audio/wav">
-        <div style="font-size: 0.85rem; color: #5a6b78;">
-          Nur <code>.wav</code>-Dateien werden angenommen.
-        </div>
-      </div>
-
-      <div id="referenceTextSection" class="hidden zeile">
-        <label for="referenceText">Text der Referenz-Aufnahme (muss genau dazu passen): </label>
-        <textarea id="referenceText" rows="3" placeholder="Bitte den Text der Referenz-Aufnahme wortgenau eingeben"></textarea>
-      </div>
-
-      <div class="zeile">
-        <label for="speed" id="speedLabel">Tempo: </label>
-        <input type="range" id="speed" name="speed" min="0.4" max="3.5" step="0.1" value="1.0">
-        <span id="speedValue"></span>
-      </div>
-
-      <textarea id="text" rows="10" placeholder="Text zum Vorlesen hier eingeben …"></textarea>
-      <div class="zeile" style="margin-top: 0.75rem;">
-        <button id="generateBtn" disabled>Vorlesen</button>
-      </div>
-      <div id="generationStatus" style="display: none;"></div>
+    <div class="zeile">
+      <label for="stimme">Stimme</label><br>
+      <select id="stimme" disabled>
+        <option>Stimmen werden geladen …</option>
+      </select>
+      <div id="stimmenBeschreibung" class="klein"></div>
     </div>
+
+    <div class="zeile" id="stimmungZeile" style="display: none;">
+      <label for="stimmung">Stimmung</label><br>
+      <select id="stimmung"></select>
+      <div class="klein">
+        Diese Stimme kann mehrere Stimmungen ausdrücken; die Auswahl wirkt auf die
+        ganze Vorlesung.
+      </div>
+    </div>
+
+    <div class="zeile">
+      <label for="speed">Tempo</label>
+      <input type="range" id="speed" min="0.4" max="3.5" step="0.1" value="1.0">
+      <span id="speedValue">1</span>
+    </div>
+
+    <div id="status">Wird geladen …</div>
+    <div id="balken"><div id="balkenFuellung"></div></div>
+
+    <div class="zeile" style="margin-top: 0.9rem;">
+      <label for="text">Text</label><br>
+      <textarea id="text" rows="10" placeholder="Text zum Vorlesen hier eingeben …"></textarea>
+    </div>
+    <div class="zeile">
+      <button id="generateBtn" disabled>Vorlesen</button>
+    </div>
+    <div id="generationStatus" style="display: none;"></div>
+    <div id="fehler"></div>
   </div>
 
   <section id="sound-clips"></section>
@@ -94,23 +112,23 @@
       <h3 style="margin-top: 0.75rem;">Technik</h3>
       <ul>
         <li>Sprachsynthese: <strong>sherpa-onnx</strong> (Apache-2.0), als WebAssembly im Browser.</li>
-        <li>Stimme: <strong>Thorsten</strong> (deutsch, Piper-Modell aus dem amtlichen
-            Modell-Release von sherpa-onnx).</li>
+        <li>Stimmen: <strong>Piper-Modelle</strong> aus dem amtlichen Modell-Release von
+            sherpa-onnx, in der verkleinerten Fassung (int8). Zur Wahl stehen mehrere
+            deutsche Stimmen; die Liste nennt zu jeder die Herkunft, die Abtastrate und
+            die Größe des einmaligen Downloads.</li>
         <li>Das gesamte Rechnen geschieht auf dem Gerät; die Seite lädt keine fremden
             Bestandteile, keine Zähl- oder Analysedienste.</li>
-        <li>Nach dem ersten Aufruf lässt sich die Seite sogar ohne Netzverbindung
-            benutzen, solange der Tab offen bleibt.</li>
+        <li>Der Rechenkern wird einmal geholt und dann aus dem Speicher des Browsers
+            bedient — auch eine gewählte Stimme. Ein zweiter Aufruf lädt nichts nach.</li>
       </ul>
       <h3>Grenzen</h3>
       <ul>
-        <li><strong>Eine Stimme.</strong> Weitere Stimmen wären ein eigener Bau des
-            Abbilds — die Stimme steckt fest im WebAssembly-Paket.</li>
         <li><strong>Kein Mikrofon, kein Vorlesen fremder Dateien</strong> als
             Textgrundlage: es gibt kein Texterkennungs-Verfahren aus Bildern.</li>
-        <li><strong>Lange Texte dauern.</strong> Die Erzeugung läuft in einem Thread;
+        <li><strong>Lange Texte dauern.</strong> Die Erzeugung läuft in einem Strang;
             für ganze Kapitel ist das Werkzeug nicht gedacht.</li>
-        <li><strong>Die Betonung ist nicht steuerbar.</strong> Fragen klingen nicht
-            automatisch fragend; Satzzeichen steuern nur Pausen.</li>
+        <li><strong>Die Betonung ist nicht frei steuerbar.</strong> Satzzeichen steuern
+            Pausen; Stimmungen gibt es nur bei der Stimme, die sie mitbringt.</li>
         <li>Erzeugte Audiodateien bleiben im Tab (nicht auf unserem Server). Wer sie
             behalten will, lädt sie vor dem Schließen herunter.</li>
       </ul>
@@ -120,11 +138,13 @@
             (Apache-2.0), Bau-Rezept nach dem amtlichen WebAssembly-Beispiel.</li>
         <li>Diese Oberfläche ist die deutsche Fassung der mitgelieferten Beispielseite;
             sie ist im Werkzeug-Repo dokumentiert.</li>
+        <li>Piper-Stimmen sind eigene Werke mit eigener Lizenz; maßgeblich ist die
+            Lizenz der jeweiligen Stimme.</li>
       </ul>
     </details>
   </div>
 </main>
 
-<script src="app-tts.js"></script>
+<script src="vorlesen.js"></script>
 </body>
 </html>

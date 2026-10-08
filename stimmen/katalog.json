@@ -1,0 +1,46 @@
+{
+  "_hinweis": "Stimmenkatalog für Vorlesen. Die Texte hier sind die Beschreibungen der Auswahl; Dateigröße, Prüfsumme und Dateiname trägt der Bau aus den tatsächlich geholten Dateien nach (stimmen/stimmen_manifest.py). Eine Stimme, die nicht geholt werden kann, bricht den Bau ab — es soll keinen Schalter ohne Wirkung geben.",
+  "_herkunft": "Sprachsynthese: sherpa-onnx (Apache-2.0). Stimmen: amtliches Modell-Release 'tts-models' von k2-fsa/sherpa-onnx (Pakete 'vits-piper-…-int8'). Die Lizenzangaben unten stammen aus der Model-Card der jeweiligen Stimme im Sprecherverzeichnis rhasspy/piper-voices und sind am 08.10.2026 dort abgelesen worden.",
+  "_auswahl": "Aufgenommen sind nur Stimmen mit einer ausdruecklichen freien Lizenz (CC0). Nicht aufgenommen, obwohl im Release vorhanden: eva_k, ramona und karlsson (Model-Card nennt 'See URL' statt einer Lizenz) sowie pavoque (CC BY-NC-SA 4.0 — nicht gewerblich, damit fuer dieses Werkzeug ungeeignet) und glados/glados_turret (Spiel-Figur, keine freie Lizenz). Weitere deutsche Stimmen koennen aufgenommen werden, sobald die Lizenzfrage geklaert ist.",
+  "vorgabe": "thorsten_gefuehl",
+  "stimmen": [
+    {
+      "kennung": "thorsten_gefuehl",
+      "quelle": "de_DE-thorsten_emotional-medium-int8",
+      "name": "Thorsten — acht Stimmungen",
+      "beschreibung": "Sprecher Thorsten, mit acht auswählbaren Stimmungen (siehe Liste darunter). Piper-Stufe medium, Abtastrate 22.050 Hz. Datensatz Thorsten-Voice, Lizenz CC0.",
+      "abtastrate": 22050,
+      "stimmungen": {
+        "4": "neutral",
+        "1": "wütend",
+        "0": "amüsiert",
+        "2": "angewidert",
+        "3": "betrunken",
+        "5": "schläfrig",
+        "6": "überrascht",
+        "7": "flüsternd"
+      }
+    },
+    {
+      "kennung": "thorsten_klar",
+      "quelle": "de_DE-thorsten-high-int8",
+      "name": "Thorsten — höchste Klangtreue",
+      "beschreibung": "Sprecher Thorsten, eine Stimmung. Piper-Stufe high, Abtastrate 22.050 Hz. Der größte Download der Auswahl, dafür die deutlichste Aussprache. Datensatz Thorsten-Voice, Lizenz CC0.",
+      "abtastrate": 22050
+    },
+    {
+      "kennung": "thorsten_klein",
+      "quelle": "de_DE-thorsten-low-int8",
+      "name": "Thorsten — kleinste Datei",
+      "beschreibung": "Sprecher Thorsten, eine Stimmung. Piper-Stufe low, Abtastrate 16.000 Hz. Kleinster Download der Auswahl — für langsame Verbindungen und ältere Geräte. Datensatz Thorsten-Voice, Lizenz CC0.",
+      "abtastrate": 16000
+    },
+    {
+      "kennung": "kerstin",
+      "quelle": "de_DE-kerstin-low-int8",
+      "name": "Kerstin — Frauenstimme",
+      "beschreibung": "Sprecherin Kerstin, eine Stimmung. Piper-Stufe low, Abtastrate 16.000 Hz. Datensatz dataset-voice-kerstin (Muttersprachlerin, weiblich, 1.374 Aufnahmen), Lizenz CC0.",
+      "abtastrate": 16000
+    }
+  ]
+}

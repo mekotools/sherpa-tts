@@ -1,8 +1,11 @@
 # Vorlesen — Ausführungs-Anleitung
 
 Öffne im Browser **sherpa-tts.mekotools.de**. Keine Anmeldung, keine Installation.
-Beim ersten Aufruf lädt die Seite einmalig das Sprachpaket (einige zehn Megabyte);
-danach arbeitet sie ohne Netzverbindung weiter, solange der Tab offen bleibt.
+Beim ersten Aufruf lädt die Seite einmalig den Rechenkern (rund 17 MB) und die
+gewählte Stimme (18 bis 36 MB). Beides bleibt danach im Browserspeicher: auch
+beim nächsten Besuch, auch nach dem Schließen des Tabs — **ein zweiter Aufruf
+lädt nichts nach**. Eine andere Stimme zu wählen ist der einzige Grund für einen
+weiteren Download (und auch den nur einmal).
 
 ## In drei Schritten
 
@@ -17,9 +20,21 @@ danach arbeitet sie ohne Netzverbindung weiter, solange der Tab offen bleibt.
 Mehrere Texte hintereinander erzeugen ist möglich: jeder Durchlauf legt ein
 eigenes Abspielgerät an, so lassen sich Fassungen vergleichen.
 
-**Stimm-Nummer:** Diese Angabe erscheint nur, wenn ein Modell mehrere Stimmen
-enthält. Unsere Stimme hat genau eine (Nummer 0) — das Feld ist dann ohne Wirkung
-und wird nicht angezeigt.
+**Stimme und Stimmung.** Oben wählst du die Stimme. Unter der Liste steht zu
+jeder, woher sie kommt, wie fein sie aufgenommen ist und wie groß der einmalige
+Download ist:
+
+- *Thorsten — acht Stimmungen:* dieselbe Stimme mit auswählbaren Stimmungen
+  (amüsiert, wütend, angewidert, betrunken, neutral, schläfrig, überrascht,
+  flüsternd). Erscheint die Liste *Stimmung*, wirkt die Auswahl auf die ganze
+  Vorlesung.
+- *Thorsten — höchste Klangtreue:* die deutlichste, aber größte Fassung.
+- *Thorsten — kleinste Datei:* für langsame Verbindungen und ältere Geräte.
+- *Kerstin:* eine Frauenstimme.
+
+Während des Ladens zeigt die Seite den Fortschritt in Prozent und Megabyte an —
+echte Zahlen aus der laufenden Übertragung. Ist die Stimme schon im Speicher,
+steht das dort ausdrücklich („es wird nichts erneut geladen").
 
 ## Dateien und Daten
 
@@ -34,8 +49,9 @@ und wird nicht angezeigt.
 
 ## Grenzen
 
-- **Eine Stimme.** Es gibt keine Auswahl zwischen Sprecherinnen und Sprechern.
-  Eine weitere Stimme wäre ein neuer Bau des Abbilds, kein Schalter.
+- **Zwei Sprecherinnen und Sprecher**, vier Stimmen. Andere deutsche Stimmen des
+  Projekts sind bewusst nicht dabei: ihre Lizenz ist unklar oder schließt eine
+  nicht gewerbliche Nutzung aus (siehe `stimmen/katalog.json`).
 - **Betonung ist nicht steuerbar.** Die Stimme liest sachlich vor; Fragen klingen
   nicht automatisch fragend, Aufzählungen werden nicht besonders hervorgehoben.
   Satzzeichen wirken nur als Pausen.
@@ -53,10 +69,11 @@ und wird nicht angezeigt.
 ## Herkunft (für die Lehrkraft, die nachfragt)
 
 - Sprachsynthese: sherpa-onnx, Fassung festgenagelt im Werkzeug-Repo.
-- Stimme: deutsches Piper-Modell `thorsten_emotional` aus dem amtlichen
-  Modell-Release des Projekts. Die **Lizenz der Stimme** ist eine eigene Angabe
-  des jeweiligen Modells und wird im Werkzeug-Repo geführt; sie ist nicht
-  dieselbe wie die Code-Lizenz.
+- Stimmen: vier deutsche Piper-Modelle aus dem amtlichen Modell-Release des
+  Projekts. Alle vier stehen unter **CC0 1.0** (keine Bedingungen); die genaue
+  Herkunft je Stimme steht in `stimmen/katalog.json`. Die **Lizenz der Stimme**
+  ist eine eigene Angabe des jeweiligen Modells und nicht dieselbe wie die
+  Code-Lizenz — deshalb wird sie je Stimme geführt.
 - Unsere Oberfläche ist die deutsche Übersetzung der mitgelieferten Beispielseite;
   die angefassten Stellen stehen als Skript im Repo und brechen ab, wenn der
   fremde Quelltext sich ändert.
